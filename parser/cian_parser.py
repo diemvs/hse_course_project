@@ -5,11 +5,13 @@ from selenium.webdriver.common.by import By
 import os
 import urllib.parse
 from urllib.parse import urljoin, urlencode
+import time
 
 from districts import District
 from utils import enum_to_int
 
 DEFAULT_PATH="kupit-kvartiru-1-komn-ili-2-komn"
+SLEEP_TIME=5
 
 class SimpleCianParser():
     # CIAN url
@@ -30,35 +32,55 @@ class SimpleCianParser():
         
         return urljoin(self.__url, path + query)
     
-    def parse(self, url: str, images_cnt: int) -> pd.DataFrame:
+    def parse(self, url: str, images_cnt: int, pages_cnt: int) -> pd.DataFrame:
         # create the pandas DataFrame
         df = pd.DataFrame([], columns=['url'])
         # create the driver
         driver = webdriver.Chrome()
         # loading the web page
         driver.get(url)
-        # finding flat list component
-        flat_list_ex = "/html/body/div[1]/div/div[6]"
-        flat_list = driver.find_element(By.XPATH, flat_list_ex)
-        # getting flat component
-        for flat in flat_list.find_elements(By.XPATH, '//div/div'):
-            # getting images list component
-            img_list = flat.find_element(By.XPATH, '//article/div[1]/a/div[1]/div/ul')
+        
+        for page in range(0, pages_cnt):
+            # finding flat list component
+            # flat_list_ex = "/html/body/div[1]/div/div[6]"
+            # flat_list = driver.find_element(By.XPATH, flat_list_ex)
             
-            for img in img_list.find_elements(By.XPATH, '//li/img'):
-                src = img.get_attribute('src')
+            # getting flat component
+            for flat in driver.find_elements(By.TAG_NAME, 'article'):
+
+                # getting images list component
+                # img_list = flat.find_element(By.XPATH, '//article/div[1]/a/div[1]/div/ul')
                 
-                df.loc[-1] = src
-                df.index = df.index + 1
-                df = df.sort_index()
+                ul = flat.find_element(By.TAG_NAME, 'ul')
                 
-                if df.shape[0] == images_cnt:
-                    return df
+                for img in ul.find_elements(By.TAG_NAME, 'img'):
+                    src = img.get_attribute('src')
+                    
+                    df.loc[-1] = src
+                    df.index = df.index + 1
+                    df = df.sort_index()
+                    
+                    if df.shape[0] == images_cnt:
+                        return df
+            
+            if(page == pages_cnt):
+                return df
+            
+            # finding next page button 
+            next_button = driver.find_element(By.XPATH, "//*[contains(text(), 'Дальше')]")
+            # clicking next page button
+            next_button.click()
+            # sleep in order to avoid blocking
+            time.sleep(SLEEP_TIME)
+        # Closes the browser 
+        driver.quit()
+        
         return df
     
     def get_flat_images(
         self, 
-        images_cnt = 100, 
+        images_cnt = 100,
+        pages_cnt = 10,
         districts: list[District] = []
     ) -> pd.DataFrame:
         url = ""
@@ -79,7 +101,7 @@ class SimpleCianParser():
             url = self.build_url(path="cat.php", params=params)
         
         # parsing thr website
-        result = self.parse(url, images_cnt)
+        result = self.parse(url, images_cnt, pages_cnt)
         
         return result
        
