@@ -9,6 +9,8 @@ from urllib.parse import urljoin, urlencode
 from districts import District
 from utils import enum_to_int
 
+DEFAULT_PATH="kupit-kvartiru-1-komn-ili-2-komn"
+
 class SimpleCianParser():
     # CIAN url
     __url = None
@@ -16,36 +18,24 @@ class SimpleCianParser():
     def __init__(self):
         # take environment variables from .env
         load_dotenv()
-        
+        # take CIAN_URL variavle from .env
         self.__url = os.environ.get('CIAN_URL')
         
-    def build_url(self, params: dict) -> str:
+    def build_url(
+            self, 
+            path: str = DEFAULT_PATH, 
+            params: dict = {}
+        ) -> str:
         query = "?" + urlencode(params)
-        return urljoin(self.__url, query)
+        
+        return urljoin(self.__url, path + query)
     
-    def get_flat_images(
-        self, 
-        images_cnt = 100, 
-        districts: list[District] = []
-    ) -> pd.DataFrame:
+    def parse(self, url: str, images_cnt: int) -> pd.DataFrame:
         # create the pandas DataFrame
         df = pd.DataFrame([], columns=['url'])
-        
-        # setting params
-        params = dict(
-            deal_type = 'sale',
-            engine_version = 2,
-            offer_type = 'flat'
-        )
-        
-        for idx, d in enumerate(districts):
-            params[f'district[{idx}]'] = enum_to_int(d)
-            
-        # build the url with params
-        url = self.build_url(params)
         # create the driver
         driver = webdriver.Chrome()
-        
+        # loading the web page
         driver.get(url)
         # finding flat list component
         flat_list_ex = "/html/body/div[1]/div/div[6]"
@@ -65,4 +55,32 @@ class SimpleCianParser():
                 if df.shape[0] == images_cnt:
                     return df
         return df
+    
+    def get_flat_images(
+        self, 
+        images_cnt = 100, 
+        districts: list[District] = []
+    ) -> pd.DataFrame:
+        url = ""
+        
+        if(len(districts) == 0):
+            url = self.build_url()
+        else:
+            # setting params
+            params = dict(
+                deal_type = 'sale',
+                engine_version = 2,
+                offer_type = 'flat'
+            )
+            # todo: remove this loop
+            for idx, d in enumerate(districts):
+                params[f'district[{idx}]'] = enum_to_int(d)
+            # build the url with params
+            url = self.build_url(path="cat.php", params=params)
+        
+        # parsing thr website
+        result = self.parse(url, images_cnt)
+        
+        return result
+       
         
