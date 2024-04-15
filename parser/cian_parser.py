@@ -40,7 +40,7 @@ class SimpleCianParser():
         # loading the web page
         driver.get(url)
         
-        for page in range(0, pages_cnt):
+        for page in range(1, pages_cnt):
             # finding flat list component
             # flat_list_ex = "/html/body/div[1]/div/div[6]"
             # flat_list = driver.find_element(By.XPATH, flat_list_ex)
