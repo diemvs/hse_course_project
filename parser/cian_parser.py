@@ -50,19 +50,21 @@ class SimpleCianParser():
 
                 # getting images list component
                 # img_list = flat.find_element(By.XPATH, '//article/div[1]/a/div[1]/div/ul')
-                
-                ul = flat.find_element(By.TAG_NAME, 'ul')
-                
-                for img in ul.find_elements(By.TAG_NAME, 'img'):
-                    src = img.get_attribute('src')
+                try: 
+                    ul = flat.find_element(By.TAG_NAME, 'ul')
                     
-                    df.loc[-1] = src
-                    df.index = df.index + 1
-                    df = df.sort_index()
+                    for img in ul.find_elements(By.TAG_NAME, 'img'):
+                        src = img.get_attribute('src')
+                        
+                        df.loc[-1] = src
+                        df.index = df.index + 1
+                        df = df.sort_index()
+                        
+                        if df.shape[0] == images_cnt:
+                            return df
+                except:
+                    print('element doesnt exist')
                     
-                    if df.shape[0] == images_cnt:
-                        return df
-            
             if(page == pages_cnt):
                 return df
             
