@@ -8,6 +8,7 @@ from urllib.parse import urljoin, urlencode
 import time
 
 from districts import District
+from object_type import ObjectType
 from utils import enum_to_int
 
 DEFAULT_PATH="kupit-kvartiru-1-komn-ili-2-komn"
@@ -83,7 +84,8 @@ class SimpleCianParser():
         self, 
         images_cnt = 100,
         pages_cnt = 10,
-        districts: list[District] = []
+        districts: list[District] = [],
+        object_types: list[ObjectType] = []
     ) -> pd.DataFrame:
         url = ""
         
@@ -99,6 +101,10 @@ class SimpleCianParser():
             # todo: remove this loop
             for idx, d in enumerate(districts):
                 params[f'district[{idx}]'] = enum_to_int(d)
+                
+            for idx, o in enumerate(object_types):
+                params[f'object_type[{idx}]'] = enum_to_int(o)
+                
             # build the url with params
             url = self.build_url(path="cat.php", params=params)
         
