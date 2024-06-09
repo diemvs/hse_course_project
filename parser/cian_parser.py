@@ -85,7 +85,9 @@ class SimpleCianParser():
         images_cnt = 100,
         pages_cnt = 10,
         districts: list[District] = [],
-        object_types: list[ObjectType] = []
+        object_types: list[ObjectType] = [],
+        maxprice = None,
+        minprice = None
     ) -> pd.DataFrame:
         url = ""
         
@@ -104,6 +106,12 @@ class SimpleCianParser():
                 
             for idx, o in enumerate(object_types):
                 params[f'object_type[{idx}]'] = enum_to_int(o)
+                
+            if(maxprice != None):
+                params['maxprice'] = maxprice
+            
+            if(minprice != None):
+                params['minprice'] = minprice
                 
             # build the url with params
             url = self.build_url(path="cat.php", params=params)
