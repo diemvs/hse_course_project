@@ -3,6 +3,7 @@ import urllib.request
 import csv
 from datetime import datetime
 import os
+import uuid
 
 def enum_to_int(v: Enum):
     return v.value
@@ -20,4 +21,4 @@ def save_to_directory(fileName: str):
         for row in filedatareader:
             url = row[1]
             if(len(url) > 0):
-                urllib.request.urlretrieve(url, f'{save_dir}/{row[0]}.jpg')
+                urllib.request.urlretrieve(url, f'{save_dir}/{uuid.uuid1()}.jpg')
