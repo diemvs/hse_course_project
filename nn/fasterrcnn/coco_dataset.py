@@ -24,12 +24,22 @@ class CocoDataset(Dataset):
         
         for temp in bbox_img:
             temp_append = []
-            pic_id = temp['image_id'] - 1
+            pic_id = temp['image_id']
             bbox = temp['bbox']
             class_id = temp['category_id']
             
+            x = bbox[0]
+            y = bbox[1]
+            w = bbox[2]
+            h = bbox[3]
+            
+            x_min = x
+            y_min = y
+            x_max = x_min + w
+            y_max = y_min + h
+            
             temp_append.append(class_id)                     
-            temp_append.append(bbox) 
+            temp_append.append([x_min, y_min, x_max, y_max]) 
             
             if self.bbox_image.__contains__(pic_id):
                 self.bbox_image[pic_id].append(temp_append)
@@ -69,3 +79,6 @@ class CocoDataset(Dataset):
             image, target = self.transforms(image, target)
 
         return image, target
+    
+    def target_names(self):
+        return self.coco_dict['categories']
