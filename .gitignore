@@ -2,6 +2,7 @@
 nn/yoloV8/datasets/*
 nn/yoloV8/runs/*
 nn/yolov8/voc/*
+nn/fasterrcnn/datasets/*
 
 # models
 *.pt
