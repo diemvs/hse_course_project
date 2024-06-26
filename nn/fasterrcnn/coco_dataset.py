@@ -6,10 +6,11 @@ import json
 from PIL import Image
 import numpy as np
 from torchvision.transforms import functional as F
+from typing import Any, Tuple
 
 class CocoDataset(Dataset):
     
-    def __init__(self, root_dir, transforms, train_set=True):
+    def __init__(self, root_dir, transforms=None, train_set=True):
         super().__init__()
         self.transforms = transforms
         self.results_json = os.path.join(root_dir, 'result.json')
@@ -47,14 +48,13 @@ class CocoDataset(Dataset):
     def __len__(self):
         return len(self.coco_dict["images"])    
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> Tuple[Any, Any]:
         image_list = self.coco_dict['images']
         file_name = image_list[idx]['file_name']
         file_path = os.path.join(self.root_dir, file_name)
-        image = Image.open(file_path)
-        image = np.array(image)
+        image = Image.open(file_path).convert("RGB")
         
-        bboxes = []      
+        bboxes = []  
         labels = []
         target = {}
         
@@ -73,7 +73,7 @@ class CocoDataset(Dataset):
             target["labels"] = labels
 
         if self.transforms is not None:
-            image, target = self.transforms(image, target)
+            image = self.transforms(image)
 
         return image, target
     
