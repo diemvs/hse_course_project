@@ -58,20 +58,29 @@ class CocoDataset(Dataset):
         labels = []
         target = {}
         
-        if self.bbox_image.__contains__(idx):
-            for annotations in self.bbox_image[idx]:
-                bboxes.append(annotations[1])
-                labels.append(annotations[0])
-            bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
-            labels = torch.as_tensor(labels, dtype=torch.int64)
-            target["boxes"] = bboxes
-            target["labels"] = labels
-        else:
-            bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
-            labels = torch.as_tensor(labels, dtype=torch.int64)
-            target["boxes"] = bboxes
-            target["labels"] = labels
-
+        # if self.bbox_image.__contains__(idx):
+        #     for annotations in self.bbox_image[idx]:
+        #         bboxes.append(annotations[1])
+        #         labels.append(annotations[0])
+        #     bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
+        #     labels = torch.as_tensor(labels, dtype=torch.int64)
+        #     target["boxes"] = bboxes
+        #     target["labels"] = labels
+        # else:
+        #     bboxes = torch.as_tensor(bboxes, dtype=torch.float32)
+        #     labels = torch.as_tensor(labels, dtype=torch.int64)
+        #     target["boxes"] = bboxes
+        #     target["labels"] = labels
+        
+        for annotations in self.bbox_image[idx]:
+            bboxes.append(annotations[1])
+            labels.append(annotations[0])
+            
+        bboxes = torch.as_tensor(bboxes, dtype=torch.float32)    
+        labels = torch.as_tensor(labels, dtype=torch.int64)
+        target["boxes"] = bboxes
+        target["labels"] = labels
+        
         if self.transforms is not None:
             image = self.transforms(image)
 
