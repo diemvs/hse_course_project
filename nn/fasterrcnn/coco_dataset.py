@@ -28,10 +28,7 @@ class CocoDataset(Dataset):
             bbox = temp['bbox']
             class_id = temp['category_id']
             
-            x = bbox[0]
-            y = bbox[1]
-            w = bbox[2]
-            h = bbox[3]
+            x, y, w, h = bbox[0], bbox[1], bbox[2], bbox[3]
             
             x_min = x
             y_min = y
